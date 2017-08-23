@@ -1,30 +1,36 @@
 var express = require('express');
 var router = express.Router();
- 
+
 var mongodb = require('mongodb');
 var config = require('../config');
-var mLab = 'mongodb://' + config.db.host + '/' + config.db.name;
+//var mLab = 'mongodb://' + config.db.host + '.mlab.com:15962//' + config.db.name;
 var MongoClient = mongodb.MongoClient
- 
+var mLab = 'mongodb://' + config.db.host + '/' + config.db.name;
 var shortid = require('shortid');
+// removes underscores and dashes from possible characterlist
 shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@');
+
 var validUrl = require('valid-url');
- 
+
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+router.get('/', function (req, res, next) {
+  var local = req.get('host');
+  res.render('index', {host: local });
 });
- 
+
 router.get('/new/:url(*)', function (req, res, next) {
   MongoClient.connect(mLab, function (err, db) {
     if (err) {
       console.log("Unable to connect to server", err);
     } else {
       console.log("Connected to server")
-     
+
       var collection = db.collection('links');
       var params = req.params.url;
-      var local = req.get('host') + "/"; 
+
+      //sets current hostname to var local
+      var local = req.get('host') + "/";
+
       var newLink = function (db, callback) {
         collection.findOne({ "url": params }, { short: 1, _id: 0 }, function (err, doc) {
           if (doc != null) {
@@ -43,27 +49,27 @@ router.get('/new/:url(*)', function (req, res, next) {
           };
         });
       };
-     
+
       newLink(db, function () {
         db.close();
       });
-     
+
     };
   });
- 
+
 });
- 
+
 router.get('/:short', function (req, res, next) {
- 
+
   MongoClient.connect(mLab, function (err, db) {
     if (err) {
       console.log("Unable to connect to server", err);
     } else {
       console.log("Connected to server")
- 
+
       var collection = db.collection('links');
       var params = req.params.short;
- 
+
       var findLink = function (db, callback) {
         collection.findOne({ "short": params }, { url: 1, _id: 0 }, function (err, doc) {
           if (doc != null) {
@@ -73,13 +79,13 @@ router.get('/:short', function (req, res, next) {
           };
         });
       };
- 
+
       findLink(db, function () {
         db.close();
       });
- 
+
     };
   });
 });
- 
+
 module.exports = router;
