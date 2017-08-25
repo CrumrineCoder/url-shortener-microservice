@@ -42,12 +42,13 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
+module.exports = app;
 //new
+
 var debug = require('debug')('my-application');
 app.set('port', process.env.PORT || 3000);
 var server = app.listen(app.get('port'), function() {
   debug('Express server listening on port ' + server.address().port);
 });
-// no longer new
-module.exports = app;
+
+

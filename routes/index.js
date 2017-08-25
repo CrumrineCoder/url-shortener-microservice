@@ -1,21 +1,20 @@
 var express = require('express');
 var router = express.Router();
 var mongodb = require('mongodb');
-var config = require('../config');
+
 var validUrl = require('valid-url');
 var shortid = require('shortid');
 // removes underscores and dashes from possible characterlist
 shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@');
 
 var MongoClient = mongodb.MongoClient
-var mLab = 'mongodb://' + config.db.host + '/' + config.db.name;
-
+var mLab = 'mongodb://' + process.env.HOST + '/' + process.env.NAME;
 // Home page
 router.get('/', function (req, res, next) {
   var local = req.get('host');
   res.render('index', {host: local });
 });
-
+console.log("URL:" + mLab);
 // url/new/something
 // The * works to make sure the code doesn't confuse the slashes in the url with a new parameter
 router.get('/new/:url(*)', function (req, res, next) {
