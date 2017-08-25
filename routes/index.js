@@ -48,19 +48,23 @@ router.get('/new/:url(*)', function (req, res, next) {
 			} else {
 				// If the URL is not in the database
 				if (validUrl.isUri(params)) {
-					// if URL is valid, do this
+					// if URL is valid, create a shortened ID and insert into the collection a new  JSON and return it to the user.
 					var shortCode = shortid.generate();
-					var newUrl = { url: params, short: shortCode };
+					var newUrl = { 
+						url: params, short: shortCode 
+					};
 					collection.insert([newUrl]);
-					res.json({ original_url: params, short_url: local + shortCode });
+					res.json({ 
+						original_url: params, short_url: local + shortCode
+					});
 				} else {
-					// if URL is invalid, do this
+					// if URL is invalid, tell the user.
 					res.json({ error: "Wrong url format, make sure you have a valid protocol and real site." });
 				};
 			};
 			});
 		};
-
+		// Close out the database after finishing the function.
       newLink(db, function () {
         db.close();
       });
@@ -82,15 +86,24 @@ router.get('/:short', function (req, res, next) {
       var params = req.params.short;
 
       var findLink = function (db, callback) {
-        collection.findOne({ "short": params }, { url: 1, _id: 0 }, function (err, doc) {
+		 // Find a document in 'links' with the same shortened URL as one in the database and return the proper URL
+        collection.findOne({
+			"short": params 
+		}, 
+		{ 
+			url: 1, _id: 0 
+		}, 
+		function (err, doc) {
           if (doc != null) {
+			  // If there is a URL in the database, redirect the user to it
             res.redirect(doc.url);
           } else {
+			  // If not, tell the user
             res.json({ error: "No corresponding shortlink found in the database." });
           };
         });
       };
-
+		// close the MongoDB database
       findLink(db, function () {
         db.close();
       });
